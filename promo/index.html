@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanNEM Pro | Planeación Didáctica Inteligente — Nueva Escuela Mexicana</title>
+<meta name="description" content="Genera planeaciones didácticas profesionales alineadas al Plan de Estudios 2022 de la SEP. Campos formativos, metodologías, PDAs y evaluación formativa en minutos.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050508;
+  --surface: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --accent: #10B981;
+  --accent-blue: #3B82F6;
+  --accent-purple: #8B5CF6;
+  --text: #FAFAFA;
+  --muted: #71717A;
+  --success: #34D399;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Animated Background ─── */
+.bg-gradient {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(16,185,129,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 20%, rgba(59,130,246,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(139,92,246,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.particles {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: rgba(16,185,129,0.3);
+  border-radius: 50%;
+  animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* ─── Navigation ─── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(5,5,8,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.nav-logo {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.nav-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700; font-size: 1.2rem;
+}
+.nav-name span { color: var(--accent); }
+.nav-cta {
+  display: flex; align-items: center; gap: 1rem;
+}
+.nav-link {
+  color: var(--muted); text-decoration: none;
+  font-size: 0.9rem; font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-link:hover { color: var(--text); }
+.btn-nav {
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+  color: white; border: none;
+  padding: 0.6rem 1.5rem; border-radius: 10px;
+  font-weight: 600; font-size: 0.9rem;
+  cursor: pointer; text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16,185,129,0.3);
+}
+
+/* ─── Hero Section ─── */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 8rem 2rem 4rem;
+}
+.hero-content { max-width: 800px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.2);
+  color: var(--success);
+  padding: 0.5rem 1.2rem; border-radius: 50px;
+  font-size: 0.85rem; font-weight: 500;
+  margin-bottom: 2rem;
+  animation: fadeInDown 0.8s ease;
+}
+.hero h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+.hero h1 .gradient-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  font-size: 1.15rem;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+.hero-buttons {
+  display: flex; gap: 1rem;
+  justify-content: center; flex-wrap: wrap;
+  animation: fadeInUp 0.8s ease 0.6s both;
+}
+.btn-hero {
+  padding: 1rem 2.5rem; border-radius: 14px;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.3s;
+  border: none;
+}
+.btn-hero-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+  color: white;
+  box-shadow: 0 4px 20px rgba(16,185,129,0.25);
+}
+.btn-hero-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(16,185,129,0.4);
+}
+.btn-hero-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-hero-secondary:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* ─── Section Base ─── */
+.section {
+  position: relative; z-index: 1;
+  padding: 6rem 2rem;
+}
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-label {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  color: var(--accent); font-size: 0.85rem;
+  font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 1rem;
+}
+.section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; margin-bottom: 1rem;
+}
+.section-subtitle {
+  color: var(--muted); font-size: 1.05rem;
+  max-width: 650px; line-height: 1.6;
+  margin-bottom: 3rem;
+}
+
+/* ─── Feature Cards ─── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.feature-card {
+  background: rgba(10,10,18,0.7);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s;
+}
+.feature-card:hover {
+  border-color: rgba(16,185,129,0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+.feature-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.feature-card h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem; font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+.feature-card p {
+  color: var(--muted);
+  font-size: 0.9rem; line-height: 1.6;
+}
+
+/* ─── Campos Formativos Grid ─── */
+.campos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+.campo-card {
+  background: rgba(10,10,18,0.8);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.8rem;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.campo-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 20px 20px 0 0;
+}
+.campo-card:nth-child(1)::before { background: linear-gradient(90deg, #10B981, #34D399); }
+.campo-card:nth-child(2)::before { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+.campo-card:nth-child(3)::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+.campo-card:nth-child(4)::before { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+.campo-card:hover { transform: translateY(-4px); }
+.campo-card h3 { font-family: 'Outfit', sans-serif; font-size: 1.05rem; margin-bottom: 0.5rem; }
+.campo-metodologia {
+  font-size: 0.8rem; color: var(--accent);
+  font-weight: 500; margin-bottom: 0.8rem;
+}
+.campo-disciplinas {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+}
+.campo-tag {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0.25rem 0.7rem; border-radius: 20px;
+  font-size: 0.75rem; color: var(--muted);
+}
+
+/* ─── How it works ─── */
+.steps-list {
+  display: flex; flex-direction: column; gap: 2rem;
+}
+.step-item {
+  display: flex; gap: 1.5rem; align-items: flex-start;
+}
+.step-number {
+  width: 48px; height: 48px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700; font-size: 1.2rem;
+}
+.step-item h3 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 0.3rem; }
+.step-item p { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+/* ─── Pricing ─── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem; max-width: 750px; margin: 0 auto;
+}
+.price-card {
+  background: rgba(10,10,18,0.8);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s;
+  position: relative;
+}
+.price-card.featured {
+  border-color: rgba(16,185,129,0.4);
+  box-shadow: 0 0 40px rgba(16,185,129,0.1);
+}
+.price-card.featured::before {
+  content: 'Más Popular';
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+  color: white;
+  padding: 0.3rem 1.2rem; border-radius: 20px;
+  font-size: 0.8rem; font-weight: 600;
+}
+.price-card h3 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; margin-bottom: 0.5rem; }
+.price-amount {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.8rem; font-weight: 800;
+  margin: 1rem 0 0.5rem;
+}
+.price-amount span { font-size: 1rem; color: var(--muted); font-weight: 400; }
+.price-period { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+.price-features li {
+  padding: 0.5rem 0; color: var(--muted);
+  font-size: 0.9rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.price-features li::before { content: '✓'; color: var(--accent); font-weight: 600; }
+.btn-price {
+  display: block; width: 100%;
+  padding: 0.9rem; border-radius: 12px;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  text-align: center;
+  transition: all 0.3s; border: none;
+}
+.btn-price-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+  color: white;
+}
+.btn-price-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* ─── Rigor Section ─── */
+.rigor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+.rigor-item {
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.rigor-item .icon { font-size: 2rem; margin-bottom: 0.8rem; }
+.rigor-item h4 { font-family: 'Outfit', sans-serif; font-size: 0.95rem; margin-bottom: 0.3rem; }
+.rigor-item p { color: var(--muted); font-size: 0.8rem; }
+
+/* ─── Footer ─── */
+.footer {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ─── Animations ─── */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .nav { padding: 0.8rem 1rem; }
+  .nav-link { display: none; }
+  .hero { padding: 7rem 1.5rem 3rem; }
+  .section { padding: 4rem 1.5rem; }
+  .step-item { flex-direction: column; align-items: center; text-align: center; }
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">📚</div>
+    <div class="nav-name">Plan<span>NEM</span> Pro</div>
+  </div>
+  <div class="nav-cta">
+    <a href="#campos" class="nav-link">Campos Formativos</a>
+    <a href="#como-funciona" class="nav-link">¿Cómo Funciona?</a>
+    <a href="#precios" class="nav-link">Precios</a>
+    <a href="/app/auth.html" class="btn-nav">Empezar Gratis</a>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">✨ Alineado al Plan de Estudios 2022 de la SEP</div>
+    <h1>Tu <span class="gradient-text">Planeación Didáctica</span> en minutos, no en horas</h1>
+    <p>Motor inteligente de planeación para docentes de primaria y secundaria. Genera documentos profesionales con campos formativos, metodologías, PDAs y evaluación formativa — todo alineado a la Nueva Escuela Mexicana.</p>
+    <div class="hero-buttons">
+      <a href="/app/auth.html" class="btn-hero btn-hero-primary">Crear mi primera planeación →</a>
+      <a href="#como-funciona" class="btn-hero btn-hero-secondary">¿Cómo funciona?</a>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label">📋 Características</div>
+    <h2 class="section-title">Todo lo que necesitas para planear</h2>
+    <p class="section-subtitle">Olvídate de los formatos en Word. PlanNEM Pro integra toda la estructura curricular de la NEM en una sola herramienta.</p>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.1);color:#10B981;">🎯</div>
+        <h3>4 Campos Formativos</h3>
+        <p>Lenguajes, Saberes y Pensamiento Científico, Ética Naturaleza y Sociedades, De lo Humano y lo Comunitario — con sus metodologías integradas.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;">📊</div>
+        <h3>Metodologías Automáticas</h3>
+        <p>ABPC, STEAM, ABP y Aprendizaje Servicio. Al elegir tu campo formativo, los momentos de la metodología se cargan automáticamente.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(139,92,246,0.1);color:#8B5CF6;">📝</div>
+        <h3>Contenidos y PDAs</h3>
+        <p>Base de datos completa de contenidos del Programa Sintético y Procesos de Desarrollo de Aprendizaje por fase y campo formativo.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.1);color:#F59E0B;">📄</div>
+        <h3>PDF Institucional</h3>
+        <p>Genera documentos profesionales con encabezado de tu escuela, CCT, firma del docente y director, y formato oficial.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(239,68,68,0.1);color:#EF4444;">♿</div>
+        <h3>Adecuaciones Curriculares</h3>
+        <p>Espacio dedicado para BAP, Diseño Universal para el Aprendizaje (DUA) y ajustes razonables. Inclusión real.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.1);color:#10B981;">💾</div>
+        <h3>Historial de Planeaciones</h3>
+        <p>Todas tus planeaciones guardadas en la nube. Accede desde cualquier dispositivo, descarga PDFs cuando quieras.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Campos Formativos Section -->
+<section class="section" id="campos" style="background:rgba(16,185,129,0.02);">
+  <div class="section-inner">
+    <div class="section-label">🏫 Estructura NEM</div>
+    <h2 class="section-title">Los 4 Campos Formativos</h2>
+    <p class="section-subtitle">Cada campo formativo tiene su propia metodología de trabajo por proyectos. PlanNEM Pro los integra automáticamente.</p>
+    
+    <div class="campos-grid">
+      <div class="campo-card">
+        <h3>📖 Lenguajes</h3>
+        <div class="campo-metodologia">Proyectos Comunitarios (ABPC) • 3 fases, 11 momentos</div>
+        <div class="campo-disciplinas">
+          <span class="campo-tag">Español</span>
+          <span class="campo-tag">Inglés</span>
+          <span class="campo-tag">Artes</span>
+        </div>
+      </div>
+      <div class="campo-card">
+        <h3>🔬 Saberes y Pensamiento Científico</h3>
+        <div class="campo-metodologia">Indagación STEAM • 5 fases</div>
+        <div class="campo-disciplinas">
+          <span class="campo-tag">Matemáticas</span>
+          <span class="campo-tag">Ciencias Naturales</span>
+          <span class="campo-tag">Tecnología</span>
+        </div>
+      </div>
+      <div class="campo-card">
+        <h3>⚖️ Ética, Naturaleza y Sociedades</h3>
+        <div class="campo-metodologia">Aprendizaje Basado en Problemas • 6 momentos</div>
+        <div class="campo-disciplinas">
+          <span class="campo-tag">Historia</span>
+          <span class="campo-tag">Geografía</span>
+          <span class="campo-tag">Cívica y Ética</span>
+        </div>
+      </div>
+      <div class="campo-card">
+        <h3>🤝 De lo Humano y lo Comunitario</h3>
+        <div class="campo-metodologia">Aprendizaje Servicio • 5 etapas</div>
+        <div class="campo-disciplinas">
+          <span class="campo-tag">Educación Física</span>
+          <span class="campo-tag">Vida Saludable</span>
+          <span class="campo-tag">Socioemocional</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Rigor Pedagógico -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label">🎓 Rigor Pedagógico</div>
+    <h2 class="section-title">Alineado a los estándares oficiales</h2>
+    <p class="section-subtitle">Cada planeación que generes cumple con los lineamientos del Plan de Estudios 2022 de la SEP.</p>
+    
+    <div class="rigor-grid">
+      <div class="rigor-item">
+        <div class="icon">📐</div>
+        <h4>Plan de Estudios 2022</h4>
+        <p>Estructura oficial de la SEP</p>
+      </div>
+      <div class="rigor-item">
+        <div class="icon">🧩</div>
+        <h4>7 Ejes Articuladores</h4>
+        <p>Transversalidad curricular</p>
+      </div>
+      <div class="rigor-item">
+        <div class="icon">📚</div>
+        <h4>Programa Sintético</h4>
+        <p>Contenidos y PDAs oficiales</p>
+      </div>
+      <div class="rigor-item">
+        <div class="icon">♿</div>
+        <h4>DUA / BAP</h4>
+        <p>Inclusión y adecuaciones</p>
+      </div>
+      <div class="rigor-item">
+        <div class="icon">📊</div>
+        <h4>Evaluación Formativa</h4>
+        <p>Instrumentos variados</p>
+      </div>
+      <div class="rigor-item">
+        <div class="icon">🏫</div>
+        <h4>Fases 3 a 6</h4>
+        <p>Primaria y Secundaria</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section" id="como-funciona" style="background:rgba(59,130,246,0.02);">
+  <div class="section-inner">
+    <div class="section-label">⚡ Proceso</div>
+    <h2 class="section-title">¿Cómo funciona?</h2>
+    <p class="section-subtitle">En 5 sencillos pasos tendrás tu planeación didáctica lista para imprimir o presentar a tu director.</p>
+    
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-number">1</div>
+        <div>
+          <h3>Datos del Centro Escolar</h3>
+          <p>Ingresa los datos de tu escuela, CCT, grado, grupo, ciclo escolar y periodo de evaluación. Se guardan para que no los repitas.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div>
+          <h3>Configura tu Proyecto</h3>
+          <p>Elige campo formativo, contenidos y PDAs. La metodología se carga automáticamente. Define la problemática, el escenario y los ejes articuladores.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div>
+          <h3>Diseña las Actividades</h3>
+          <p>Por cada momento de la metodología, escribe tus actividades de inicio, desarrollo y cierre. Asigna tiempos y recursos.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">4</div>
+        <div>
+          <h3>Evaluación y Adecuaciones</h3>
+          <p>Selecciona instrumentos de evaluación, escribe tus criterios, y agrega las adecuaciones curriculares y observaciones.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">5</div>
+        <div>
+          <h3>Descarga tu PDF</h3>
+          <p>Tu planeación se genera como un documento PDF profesional con encabezado institucional, tablas de actividades y espacio para firmas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="section" id="precios">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-label" style="justify-content:center;">💎 Planes</div>
+    <h2 class="section-title">Invierte en tu práctica docente</h2>
+    <p class="section-subtitle" style="margin-left:auto;margin-right:auto;">Prueba gratis con tu primera planeación. Sin compromisos.</p>
+    
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Plan Mensual</h3>
+        <div class="price-amount">$399 <span>MXN</span></div>
+        <div class="price-period">por mes</div>
+        <ul class="price-features">
+          <li>Planeaciones ilimitadas</li>
+          <li>Todos los campos formativos</li>
+          <li>Generación de PDF profesional</li>
+          <li>Historial en la nube</li>
+          <li>Adecuaciones curriculares</li>
+        </ul>
+        <a href="/app/auth.html" class="btn-price btn-price-secondary">Comenzar</a>
+      </div>
+      <div class="price-card featured">
+        <h3>Plan Anual</h3>
+        <div class="price-amount">$3,999 <span>MXN</span></div>
+        <div class="price-period">por año (ahorra $789)</div>
+        <ul class="price-features">
+          <li>Todo lo del plan mensual</li>
+          <li>Ahorro del 17%</li>
+          <li>Planeaciones ilimitadas</li>
+          <li>Soporte prioritario</li>
+          <li>Actualizaciones incluidas</li>
+        </ul>
+        <a href="/app/auth.html" class="btn-price btn-price-primary">Comenzar</a>
+      </div>
+    </div>
+    
+    <p style="color:var(--muted);font-size:0.85rem;margin-top:2rem;">🎁 Tu primera planeación es <strong style="color:var(--success)">completamente gratuita</strong>. Sin tarjeta de crédito.</p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>© Todos los derechos reservados y marca registrada bajo propiedad intelectual de <strong>Service Menthal Care</strong></p>
+  <p style="margin-top:0.5rem;font-size:0.8rem;">PlanNEM Pro — Motor de Planeación Didáctica para la Nueva Escuela Mexicana</p>
+</footer>
+
+<script>
+// Particle effect
+const particleContainer = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (8 + Math.random() * 15) + 's';
+  p.style.animationDelay = Math.random() * 10 + 's';
+  p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+  particleContainer.appendChild(p);
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+
+</body>
+</html>

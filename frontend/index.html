@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanNEM Pro | Motor de Planeación Didáctica</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/styles.css?v=1.0.0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="./js/auth.js?v=1.0.0"></script>
+<script src="./js/nem-data.js?v=1.0.0"></script>
+</head>
+<body>
+
+<div id="user-header" class="auth-header">
+    <div class="brand">📚 PlanNEM Pro</div>
+    <!-- Inyectado por JS -->
+</div>
+
+<div class="container">
+    
+    <!-- PASO 1 -->
+    <section id="step-1" class="step-section active">
+        <h2 style="margin-bottom:1.5rem; color:var(--accent);">1. Datos del Centro Escolar y Periodo</h2>
+        
+        <div class="card">
+            <h3 style="margin-bottom:1rem;">Perfil Escolar</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                <div class="form-group">
+                    <label>Nombre de la Escuela</label>
+                    <input type="text" id="school_name" class="form-control" placeholder="Escuela Primaria...">
+                </div>
+                <div class="form-group">
+                    <label>CCT</label>
+                    <input type="text" id="cct" class="form-control" placeholder="Clave del centro">
+                </div>
+                <div class="form-group">
+                    <label>Nivel Educativo</label>
+                    <select id="nivel" class="form-control">
+                        <option value="">Selecciona nivel</option>
+                        <option value="Primaria">Primaria</option>
+                        <option value="Secundaria">Secundaria</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Turno</label>
+                    <select id="turno" class="form-control">
+                        <option value="Matutino">Matutino</option>
+                        <option value="Vespertino">Vespertino</option>
+                        <option value="Tiempo Completo">Tiempo Completo</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom:1rem;">Grado y Periodo</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                <div class="form-group">
+                    <label>Fase NEM</label>
+                    <select id="fase" class="form-control">
+                        <option value="">Selecciona fase</option>
+                        <!-- Llenado por JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Grado</label>
+                    <select id="grado" class="form-control">
+                        <option value="">Selecciona grado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Grupo</label>
+                    <input type="text" id="grupo" class="form-control" placeholder="Ej: A, B">
+                </div>
+                <div class="form-group">
+                    <label>Ciclo Escolar</label>
+                    <input type="text" id="ciclo_escolar" class="form-control" value="2025-2026">
+                </div>
+                <div class="form-group">
+                    <label>Periodo de Evaluación</label>
+                    <select id="periodo_evaluacion" class="form-control">
+                        <option value="1° Trimestre">1° Trimestre</option>
+                        <option value="2° Trimestre">2° Trimestre</option>
+                        <option value="3° Trimestre">3° Trimestre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Inicio Proyecto</label>
+                    <input type="date" id="fecha_inicio" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Fecha Fin Proyecto</label>
+                    <input type="date" id="fecha_fin" class="form-control">
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align:right;">
+            <button class="btn btn-primary" onclick="goToStep(2)">Siguiente: Proyecto →</button>
+        </div>
+    </section>
+
+    <!-- PASO 2 -->
+    <section id="step-2" class="step-section">
+        <h2 style="margin-bottom:1.5rem; color:var(--accent);">2. Configuración del Proyecto</h2>
+        
+        <div class="card">
+            <div class="form-group">
+                <label>Campo Formativo Principal</label>
+                <select id="campo_formativo" class="form-control">
+                    <option value="">Selecciona el campo</option>
+                    <!-- Llenado por JS -->
+                </select>
+            </div>
+            
+            <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); padding:1rem; border-radius:10px; margin-bottom:1.5rem;">
+                <p style="font-size:0.85rem; color:var(--accent-blue); margin-bottom:0.3rem; font-weight:600;">Metodología Sugerida por la SEP:</p>
+                <h3 id="metodologia-display" style="color:#93C5FD;">Selecciona un campo formativo primero</h3>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre del Proyecto</label>
+                <input type="text" id="nombre_proyecto" class="form-control" placeholder="Ej: Mi comunidad sin basura">
+            </div>
+
+            <div class="form-group">
+                <label>Problemática o Situación del Contexto</label>
+                <textarea id="problematica" class="form-control" placeholder="Describe el problema que el proyecto va a resolver..."></textarea>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                <div class="form-group">
+                    <label>Justificación</label>
+                    <textarea id="justificacion" class="form-control" placeholder="¿Por qué es importante este proyecto?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Escenario</label>
+                    <select id="escenario" class="form-control">
+                        <option value="Aula">Aula</option>
+                        <option value="Escuela">Escuela</option>
+                        <option value="Comunidad">Comunidad</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom:1rem;">Ejes Articuladores</h3>
+            <div id="ejes-container"></div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom:1rem;">Contenidos y PDA (Programa Sintético)</h3>
+            <div id="contenidos-container">
+                <!-- Se llenan al cambiar campo y fase -->
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3 style="margin-bottom:1rem;">Productos Esperados</h3>
+            <div class="form-group">
+                <label>Producto Final</label>
+                <input type="text" id="producto_final" class="form-control" placeholder="Ej: Campaña de reciclaje">
+            </div>
+            <div class="form-group">
+                <label>Productos Parciales (Opcional)</label>
+                <input type="text" id="productos_parciales" class="form-control" placeholder="Bocetos, investigaciones previas...">
+            </div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between;">
+            <button class="btn btn-secondary" onclick="goToStep(1)">← Atrás</button>
+            <button class="btn btn-primary" onclick="goToStep(3)">Siguiente: Actividades →</button>
+        </div>
+    </section>
+
+    <!-- PASO 3 -->
+    <section id="step-3" class="step-section">
+        <h2 style="margin-bottom:1.5rem; color:var(--accent);">3. Secuencia Didáctica de Actividades</h2>
+        
+        <div id="actividades-container">
+            <!-- Se generan los acordeones según la metodología -->
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; margin-top:2rem;">
+            <button class="btn btn-secondary" onclick="goToStep(2)">← Atrás</button>
+            <button class="btn btn-primary" onclick="goToStep(4)">Siguiente: Evaluación →</button>
+        </div>
+    </section>
+
+    <!-- PASO 4 -->
+    <section id="step-4" class="step-section">
+        <h2 style="margin-bottom:1.5rem; color:var(--accent);">4. Evaluación y Adecuaciones</h2>
+        
+        <div class="card">
+            <h3 style="margin-bottom:1rem;">Evaluación Formativa</h3>
+            
+            <div class="form-group">
+                <label>Tipo de Evaluación Principal</label>
+                <select id="tipo_evaluacion" class="form-control">
+                    <option value="Formativa">Formativa</option>
+                    <option value="Diagnóstica">Diagnóstica</option>
+                    <option value="Sumativa">Sumativa</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Instrumentos de Evaluación a utilizar</label>
+                <div id="instrumentos-container" style="margin-top:0.5rem;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Criterios de Evaluación (vinculados a los PDA)</label>
+                <textarea id="criterios_eval" class="form-control" placeholder="¿Qué vas a observar/evaluar en los alumnos?"></textarea>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom:1rem;">Inclusión y Ajustes</h3>
+            <div class="form-group">
+                <label>Adecuaciones Curriculares (BAP, DUA, Ajustes Razonables)</label>
+                <textarea id="adecuaciones" class="form-control" placeholder="Describe las adaptaciones para alumnos con requerimientos específicos..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Observaciones / Notas del docente</label>
+                <textarea id="observaciones" class="form-control"></textarea>
+            </div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; margin-top:2rem;">
+            <button class="btn btn-secondary" onclick="goToStep(3)">← Atrás</button>
+            <button id="btn-generate" class="btn btn-primary" onclick="saveAndGeneratePDF()">Guardar y Generar PDF</button>
+        </div>
+    </section>
+
+    <!-- PASO 5 -->
+    <section id="step-5" class="step-section">
+        <h2 style="margin-bottom:1.5rem; color:var(--accent);">5. Historial de Planeaciones</h2>
+        
+        <div id="historial-list">
+            <!-- Cargado por JS -->
+        </div>
+    </section>
+
+</div>
+
+<!-- Navigation Dock -->
+<nav class="dock">
+    <button class="dock-btn active" onclick="goToStep(1)"><span>1</span> Datos</button>
+    <button class="dock-btn" onclick="goToStep(2)"><span>2</span> Proyecto</button>
+    <button class="dock-btn" onclick="goToStep(3)"><span>3</span> Actividades</button>
+    <button class="dock-btn" onclick="goToStep(4)"><span>4</span> Evaluación</button>
+    <button class="dock-btn" onclick="goToStep(5)"><span>5</span> Historial</button>
+</nav>
+
+<script src="./js/app.js?v=1.0.0"></script>
+</body>
+</html>

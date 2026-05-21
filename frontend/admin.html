@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Administración | PlanNEM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/styles.css?v=1.0.0">
+<script src="./js/auth.js?v=1.0.0"></script>
+<style>
+.admin-container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+.header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+.logo-icon { font-size: 2rem; }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.status-active { background: var(--success); box-shadow: 0 0 8px var(--success); }
+.status-inactive { background: var(--danger); }
+.action-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+.action-btn:hover { background: var(--surface-hover); }
+</style>
+</head>
+<body>
+
+<div class="admin-container">
+    <div class="header">
+        <div class="logo-icon">📚</div>
+        <div>
+            <h1>Panel de Administración</h1>
+            <p class="subtitle">Gestión de usuarios y suscripciones PlanNEM Pro</p>
+        </div>
+    </div>
+
+    <!-- Panel de Login Admin -->
+    <div id="admin-login" class="card" style="max-width: 400px; margin: 4rem auto;">
+        <h3 style="margin-bottom: 1.5rem;">Acceso Administrativo</h3>
+        <div class="form-group">
+            <label>Contraseña Admin</label>
+            <input type="password" id="admin-pwd" class="form-control" required>
+        </div>
+        <button onclick="loadUsers()" class="btn btn-primary" style="width: 100%">Entrar</button>
+    </div>
+
+    <!-- Panel de Usuarios -->
+    <div id="admin-dashboard" class="card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3>Usuarios Registrados</h3>
+            <button onclick="window.ccAuth.logoutUser()" class="btn btn-secondary">Cerrar Sesión</button>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Plan Actual</th>
+                        <th>Estado</th>
+                        <th>Registro</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="users-tbody">
+                    <!-- Data here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let adminPassword = '';
+
+async function loadUsers() {
+    const pwd = document.getElementById('admin-pwd').value;
+    if (!pwd && !adminPassword) return alert('Ingresa la contraseña');
+    if (pwd) adminPassword = pwd;
+
+    try {
+        const res = await window.ccAuth.authFetch('/api/admin/users', {
+            headers: { 'X-Admin-Password': adminPassword }
+        });
+        
+        if (res.ok) {
+            const users = await res.json();
+            document.getElementById('admin-login').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'block';
+            
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '';
+            
+            users.forEach(u => {
+                const isPlanActive = u.plan_expires_at && new Date(u.plan_expires_at) > new Date();
+                const statusHtml = isPlanActive 
+                    ? `<span class="status-dot status-active"></span> Activo` 
+                    : `<span class="status-dot status-inactive"></span> Inactivo`;
+                
+                const date = new Date(u.created_at).toLocaleDateString();
+                const planDisplay = u.plan === 'yearly' ? 'Anual' : (u.plan === 'monthly' ? 'Mensual' : 'Prueba');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${u.name}</td>
+                    <td>${u.email}</td>
+                    <td>${planDisplay}</td>
+                    <td>${statusHtml}</td>
+                    <td>${date}</td>
+                    <td>
+                        <button class="action-btn" onclick="activateUser(${u.id}, '${u.email}', 'monthly')">Activar Mes</button>
+                        <button class="action-btn" onclick="activateUser(${u.id}, '${u.email}', 'yearly')">Activar Año</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            alert('Acceso denegado o error del servidor');
+            adminPassword = '';
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function activateUser(userId, email, plan) {
+    const planName = plan === 'yearly' ? 'Anual' : 'Mensual';
+    if (!confirm(`¿Confirmas activar el plan ${planName} para ${email}?`)) return;
+
+    try {
+        const res = await window.ccAuth.authFetch(`/api/admin/activate/${userId}`, {
+            method: 'POST',
+            body: JSON.stringify({ plan, password: adminPassword })
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+            alert('✅ ' + data.message);
+            loadUsers();
+        } else {
+            alert('Error: ' + (data.detail || 'No se pudo activar'));
+        }
+    } catch(e) {
+        alert('Error de conexión');
+    }
+}
+
+// init auth check to ensure we have a token (admin must log in as normal user first)
+window.onload = async () => {
+    const user = await window.ccAuth.checkAuth(false);
+    if (user && user.email !== 'admin@admin.com') {
+        alert('Esta cuenta no tiene privilegios de administrador.');
+        window.location.href = '/app/';
+    }
+};
+</script>
+
+</body>
+</html>
