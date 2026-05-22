@@ -317,14 +317,23 @@ def get_evaluacion_options():
 from nem_templates import SUGERENCIAS_PROYECTOS
 
 @app.get("/api/nem/suggest_project")
-def suggest_project(fase: int, campo: str, mes: str):
+def suggest_project(fase: int, campo: str, mes: str = ""):
     fase_data = SUGERENCIAS_PROYECTOS.get(fase, {})
     campo_data = fase_data.get(campo, {})
-    sugerencias = campo_data.get(mes, [])
+    
+    sugerencias = []
+    # If mes matches, add those
+    if mes in campo_data:
+        sugerencias.extend(campo_data[mes])
+    
+    # Always include general ones if they exist
+    if "general" in campo_data:
+        sugerencias.extend(campo_data["general"])
+        
     if not sugerencias:
-        return {"error": "No hay sugerencias precargadas para esta combinación. Intenta con Fase 3 - Lenguajes - Noviembre."}
-    # Return the first matching template for simplicity
-    return sugerencias[0]
+        return {"error": "No hay sugerencias precargadas para esta combinación. Intenta con Fase 3 - Lenguajes."}
+        
+    return {"sugerencias": sugerencias}
 
 # --- PLANEACIONES ENDPOINTS ---
 

@@ -275,20 +275,22 @@ function saveCurrentStepData(step) {
     }
 }
 
+let currentSuggestions = [];
+
 // AutoSuggest Project from Backend
 async function autoSuggestProject() {
     const fase = qs('#fase').value;
     const campo = qs('#campo_formativo').value;
     const mes = qs('#mes_sugerido').value;
     
-    if (!fase || !campo || !mes) {
-        alert("Para recibir una sugerencia, por favor selecciona Fase, Campo Formativo y un Mes/Efeméride primero.");
+    if (!fase || !campo) {
+        alert("Para recibir sugerencias, por favor selecciona Fase y Campo Formativo.");
         return;
     }
     
     const btn = qs('button[onclick="autoSuggestProject()"]');
     const oldText = btn.innerHTML;
-    btn.innerHTML = '⏳ Generando sugerencia inteligente...';
+    btn.innerHTML = '⏳ Buscando sugerencias...';
     btn.disabled = true;
     
     try {
@@ -301,96 +303,123 @@ async function autoSuggestProject() {
             return;
         }
         
-        // Populate inputs
-        qs('#nombre_proyecto').value = data.titulo || '';
-        qs('#problematica').value = data.problematica || '';
-        qs('#justificacion').value = data.justificacion || '';
-        qs('#producto_final').value = data.producto_final || '';
-        
-        // Ejes Articuladores Checkboxes
-        if (data.ejes_articuladores) {
-            qsa('.eje-checkbox').forEach(cb => {
-                cb.checked = data.ejes_articuladores.includes(cb.value);
-            });
+        currentSuggestions = data.sugerencias || [];
+        if (currentSuggestions.length === 0) {
+            alert("No hay sugerencias para esta combinación.");
+            return;
         }
-        
-        // PDAs - since PDAs are dynamically rendered, we might just try to check them if text matches
-        if (data.pdas) {
-            qsa('.pda-checkbox').forEach(cb => {
-                cb.checked = data.pdas.some(p => p.includes(cb.value.substring(0, 20))); // Match beginning to be safe
-            });
-        }
-        
-        // Actividades
-        if (data.actividades) {
-            // Actividades is an array in the template. We need to map it to our moments.
-            data.actividades.forEach((act) => {
-                // Find moment ID by matching text in the DOM or pre-mapping
-                // A simpler way: we'll just store the text and update the UI
-                const mIds = Array.from(qsa('.accordion-header span')).filter(s => s.textContent === act.momento);
-                if(mIds.length > 0) {
-                    const accordion = mIds[0].parentElement.parentElement;
-                    const inputs = accordion.querySelectorAll('.act-input');
-                    inputs.forEach(input => {
-                        const mId = input.dataset.id;
-                        if (!planeacionData.actividades[mId]) planeacionData.actividades[mId] = {inicio:'', desarrollo:'', cierre:'', tiempo:'', recursos:''};
-                        
-                        if (input.dataset.field === act.tipo.toLowerCase()) {
-                            planeacionData.actividades[mId][act.tipo.toLowerCase()] = act.descripcion;
-                            input.value = act.descripcion;
-                        }
-                        if (act.tiempo && input.dataset.field === 'tiempo') {
-                            planeacionData.actividades[mId].tiempo = act.tiempo + ' min';
-                            input.value = act.tiempo + ' min';
-                        }
-                    });
-                }
-            });
-        }
-        
-        // Rubrica
-        if (data.rubrica) {
-            qs('#tipo_evaluacion').value = "Formativa";
-            // Check rubrica checkbox
-            qsa('.inst-checkbox').forEach(cb => {
-                if (cb.value === "Rúbrica" || cb.value === "Lista de cotejo") cb.checked = true;
-            });
-            
-            qs('#criterios_eval').value = data.rubrica.criterios.map(c => c.criterio).join(", ");
-            
-            const rubContainer = qs('#rubrica-container');
-            const rubContent = qs('#rubrica-content');
-            rubContainer.style.display = 'block';
-            
-            let rubHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px;">
-                <tr style="border-bottom:1px solid rgba(16,185,129,0.3);">
-                    <th style="padding:5px;text-align:left;">Criterio</th>
-                    <th style="padding:5px;text-align:left;">Excelente</th>
-                    <th style="padding:5px;text-align:left;">Bueno</th>
-                    <th style="padding:5px;text-align:left;">Suficiente</th>
-                </tr>`;
-            
-            data.rubrica.criterios.forEach(c => {
-                rubHtml += `<tr style="border-bottom:1px solid rgba(16,185,129,0.1);">
-                    <td style="padding:5px; font-weight:bold;">${c.criterio}</td>
-                    <td style="padding:5px;">${c.excelente || 'Sí'}</td>
-                    <td style="padding:5px;">${c.bueno || 'Parcialmente'}</td>
-                    <td style="padding:5px;">${c.suficiente || 'No'}</td>
-                </tr>`;
-            });
-            rubHtml += `</table>`;
-            rubContent.innerHTML = rubHtml;
-        }
-        
-        alert("¡Proyecto sugerido cargado con éxito! Revisa los campos y modifica lo que necesites.");
+
+        renderSugerenciasModal();
         
     } catch (e) {
         console.error(e);
-        alert("Hubo un error al cargar la sugerencia.");
+        alert("Hubo un error al cargar las sugerencias.");
     } finally {
         btn.innerHTML = oldText;
         btn.disabled = false;
     }
+}
+
+function renderSugerenciasModal() {
+    const list = qs('#sugerencias-list');
+    list.innerHTML = '';
+
+    currentSuggestions.forEach((sug, index) => {
+        list.innerHTML += `
+            <div style="border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:1rem; background:#f8fafc;">
+                <h3 style="color:var(--accent-blue); margin-bottom:0.5rem;">${sug.titulo}</h3>
+                <p style="font-size:0.9rem; margin-bottom:0.5rem;"><strong>Problemática:</strong> ${sug.problematica}</p>
+                <p style="font-size:0.9rem; margin-bottom:1rem;"><strong>Producto:</strong> ${sug.producto_final}</p>
+                <button class="btn btn-primary" onclick="applySuggestion(${index})" style="width:100%;">Seleccionar este Proyecto</button>
+            </div>
+        `;
+    });
+
+    qs('#sugerencias-modal').style.display = 'flex';
+}
+
+function applySuggestion(index) {
+    const data = currentSuggestions[index];
+    qs('#sugerencias-modal').style.display = 'none';
+
+    // Populate inputs
+    qs('#nombre_proyecto').value = data.titulo || '';
+    qs('#problematica').value = data.problematica || '';
+    qs('#justificacion').value = data.justificacion || '';
+    qs('#producto_final').value = data.producto_final || '';
+    
+    // Ejes Articuladores Checkboxes
+    if (data.ejes_articuladores) {
+        qsa('.eje-checkbox').forEach(cb => {
+            cb.checked = data.ejes_articuladores.includes(cb.value);
+        });
+    }
+    
+    // PDAs
+    if (data.pdas) {
+        qsa('.pda-checkbox').forEach(cb => {
+            cb.checked = data.pdas.some(p => p.includes(cb.value.substring(0, 20))); 
+        });
+    }
+    
+    // Actividades
+    if (data.actividades) {
+        data.actividades.forEach((act) => {
+            const mIds = Array.from(qsa('.accordion-header span')).filter(s => s.textContent === act.momento);
+            if(mIds.length > 0) {
+                const accordion = mIds[0].parentElement.parentElement;
+                const inputs = accordion.querySelectorAll('.act-input');
+                inputs.forEach(input => {
+                    const mId = input.dataset.id;
+                    if (!planeacionData.actividades[mId]) planeacionData.actividades[mId] = {inicio:'', desarrollo:'', cierre:'', tiempo:'', recursos:''};
+                    
+                    if (input.dataset.field === act.tipo.toLowerCase()) {
+                        planeacionData.actividades[mId][act.tipo.toLowerCase()] = act.descripcion;
+                        input.value = act.descripcion;
+                    }
+                    if (act.tiempo && input.dataset.field === 'tiempo') {
+                        planeacionData.actividades[mId].tiempo = act.tiempo + ' min';
+                        input.value = act.tiempo + ' min';
+                    }
+                });
+            }
+        });
+    }
+    
+    // Rubrica
+    if (data.rubrica) {
+        qs('#tipo_evaluacion').value = "Formativa";
+        qsa('.inst-checkbox').forEach(cb => {
+            if (cb.value === "Rúbrica" || cb.value === "Lista de cotejo") cb.checked = true;
+        });
+        
+        qs('#criterios_eval').value = data.rubrica.criterios.map(c => c.criterio).join(", ");
+        
+        const rubContainer = qs('#rubrica-container');
+        const rubContent = qs('#rubrica-content');
+        rubContainer.style.display = 'block';
+        
+        let rubHtml = \`<table style="width:100%; border-collapse:collapse; margin-top:10px;">
+            <tr style="border-bottom:1px solid rgba(16,185,129,0.3);">
+                <th style="padding:5px;text-align:left;">Criterio</th>
+                <th style="padding:5px;text-align:left;">Excelente</th>
+                <th style="padding:5px;text-align:left;">Bueno</th>
+                <th style="padding:5px;text-align:left;">Suficiente</th>
+            </tr>\`;
+        
+        data.rubrica.criterios.forEach(c => {
+            rubHtml += \`<tr style="border-bottom:1px solid rgba(16,185,129,0.1);">
+                <td style="padding:5px; font-weight:bold;">\${c.criterio}</td>
+                <td style="padding:5px;">\${c.excelente || 'Sí'}</td>
+                <td style="padding:5px;">\${c.bueno || 'Parcialmente'}</td>
+                <td style="padding:5px;">\${c.suficiente || 'No'}</td>
+            </tr>\`;
+        });
+        rubHtml += \`</table>\`;
+        rubContent.innerHTML = rubHtml;
+    }
+    
+    alert("¡Proyecto cargado con éxito! Puedes ir a las Actividades y Evaluación para verificar los cambios.");
 }
 
 // Cargar perfil escolar
