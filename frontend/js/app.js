@@ -399,23 +399,23 @@ function applySuggestion(index) {
         const rubContent = qs('#rubrica-content');
         rubContainer.style.display = 'block';
         
-        let rubHtml = \`<table style="width:100%; border-collapse:collapse; margin-top:10px;">
+        let rubHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px;">
             <tr style="border-bottom:1px solid rgba(16,185,129,0.3);">
                 <th style="padding:5px;text-align:left;">Criterio</th>
                 <th style="padding:5px;text-align:left;">Excelente</th>
                 <th style="padding:5px;text-align:left;">Bueno</th>
                 <th style="padding:5px;text-align:left;">Suficiente</th>
-            </tr>\`;
+            </tr>`;
         
         data.rubrica.criterios.forEach(c => {
-            rubHtml += \`<tr style="border-bottom:1px solid rgba(16,185,129,0.1);">
-                <td style="padding:5px; font-weight:bold;">\${c.criterio}</td>
-                <td style="padding:5px;">\${c.excelente || 'Sí'}</td>
-                <td style="padding:5px;">\${c.bueno || 'Parcialmente'}</td>
-                <td style="padding:5px;">\${c.suficiente || 'No'}</td>
-            </tr>\`;
+            rubHtml += `<tr style="border-bottom:1px solid rgba(16,185,129,0.1);">
+                <td style="padding:5px; font-weight:bold;">${c.criterio}</td>
+                <td style="padding:5px;">${c.excelente || 'Sí'}</td>
+                <td style="padding:5px;">${c.bueno || 'Parcialmente'}</td>
+                <td style="padding:5px;">${c.suficiente || 'No'}</td>
+            </tr>`;
         });
-        rubHtml += \`</table>\`;
+        rubHtml += `</table>`;
         rubContent.innerHTML = rubHtml;
     }
     
