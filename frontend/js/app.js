@@ -275,6 +275,124 @@ function saveCurrentStepData(step) {
     }
 }
 
+// AutoSuggest Project from Backend
+async function autoSuggestProject() {
+    const fase = qs('#fase').value;
+    const campo = qs('#campo_formativo').value;
+    const mes = qs('#mes_sugerido').value;
+    
+    if (!fase || !campo || !mes) {
+        alert("Para recibir una sugerencia, por favor selecciona Fase, Campo Formativo y un Mes/Efeméride primero.");
+        return;
+    }
+    
+    const btn = qs('button[onclick="autoSuggestProject()"]');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = '⏳ Generando sugerencia inteligente...';
+    btn.disabled = true;
+    
+    try {
+        const res = await window.ccAuth.authFetch(`/api/nem/suggest_project?fase=${fase}&campo=${campo}&mes=${mes}`);
+        if (!res.ok) throw new Error("Error fetching suggestion");
+        const data = await res.json();
+        
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        
+        // Populate inputs
+        qs('#nombre_proyecto').value = data.titulo || '';
+        qs('#problematica').value = data.problematica || '';
+        qs('#justificacion').value = data.justificacion || '';
+        qs('#producto_final').value = data.producto_final || '';
+        
+        // Ejes Articuladores Checkboxes
+        if (data.ejes_articuladores) {
+            qsa('.eje-checkbox').forEach(cb => {
+                cb.checked = data.ejes_articuladores.includes(cb.value);
+            });
+        }
+        
+        // PDAs - since PDAs are dynamically rendered, we might just try to check them if text matches
+        if (data.pdas) {
+            qsa('.pda-checkbox').forEach(cb => {
+                cb.checked = data.pdas.some(p => p.includes(cb.value.substring(0, 20))); // Match beginning to be safe
+            });
+        }
+        
+        // Actividades
+        if (data.actividades) {
+            // Actividades is an array in the template. We need to map it to our moments.
+            data.actividades.forEach((act) => {
+                // Find moment ID by matching text in the DOM or pre-mapping
+                // A simpler way: we'll just store the text and update the UI
+                const mIds = Array.from(qsa('.accordion-header span')).filter(s => s.textContent === act.momento);
+                if(mIds.length > 0) {
+                    const accordion = mIds[0].parentElement.parentElement;
+                    const inputs = accordion.querySelectorAll('.act-input');
+                    inputs.forEach(input => {
+                        const mId = input.dataset.id;
+                        if (!planeacionData.actividades[mId]) planeacionData.actividades[mId] = {inicio:'', desarrollo:'', cierre:'', tiempo:'', recursos:''};
+                        
+                        if (input.dataset.field === act.tipo.toLowerCase()) {
+                            planeacionData.actividades[mId][act.tipo.toLowerCase()] = act.descripcion;
+                            input.value = act.descripcion;
+                        }
+                        if (act.tiempo && input.dataset.field === 'tiempo') {
+                            planeacionData.actividades[mId].tiempo = act.tiempo + ' min';
+                            input.value = act.tiempo + ' min';
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Rubrica
+        if (data.rubrica) {
+            qs('#tipo_evaluacion').value = "Formativa";
+            // Check rubrica checkbox
+            qsa('.inst-checkbox').forEach(cb => {
+                if (cb.value === "Rúbrica" || cb.value === "Lista de cotejo") cb.checked = true;
+            });
+            
+            qs('#criterios_eval').value = data.rubrica.criterios.map(c => c.criterio).join(", ");
+            
+            const rubContainer = qs('#rubrica-container');
+            const rubContent = qs('#rubrica-content');
+            rubContainer.style.display = 'block';
+            
+            let rubHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                <tr style="border-bottom:1px solid rgba(16,185,129,0.3);">
+                    <th style="padding:5px;text-align:left;">Criterio</th>
+                    <th style="padding:5px;text-align:left;">Excelente</th>
+                    <th style="padding:5px;text-align:left;">Bueno</th>
+                    <th style="padding:5px;text-align:left;">Suficiente</th>
+                </tr>`;
+            
+            data.rubrica.criterios.forEach(c => {
+                rubHtml += `<tr style="border-bottom:1px solid rgba(16,185,129,0.1);">
+                    <td style="padding:5px; font-weight:bold;">${c.criterio}</td>
+                    <td style="padding:5px;">${c.excelente || 'Sí'}</td>
+                    <td style="padding:5px;">${c.bueno || 'Parcialmente'}</td>
+                    <td style="padding:5px;">${c.suficiente || 'No'}</td>
+                </tr>`;
+            });
+            rubHtml += `</table>`;
+            rubContent.innerHTML = rubHtml;
+        }
+        
+        alert("¡Proyecto sugerido cargado con éxito! Revisa los campos y modifica lo que necesites.");
+        
+    } catch (e) {
+        console.error(e);
+        alert("Hubo un error al cargar la sugerencia.");
+    } finally {
+        btn.innerHTML = oldText;
+        btn.disabled = false;
+    }
+}
+
 // Cargar perfil escolar
 async function loadSchoolProfile() {
     try {
@@ -414,8 +532,25 @@ function generatePDFClientSide(data) {
     });
     y += 10;
     
+    // Rubrica display in PDF
+    const rubContent = qs('#rubrica-content');
+    if (rubContent && rubContent.innerHTML.includes('table')) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Instrumento de Evaluación Sugerido:", 14, y); y+=7;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        
+        // Simular tabla básica
+        doc.text("Criterios:", 14, y); y+=5;
+        data.evaluacion.criterios.split(', ').forEach(crit => {
+            doc.text(`• ${crit}`, 14, y); y+=5;
+        });
+        y+=5;
+    }
+    
     // Finish simply and trigger download
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
     doc.text("Nota: El formato completo de actividades se guarda en plataforma.", 14, y);
     
     doc.save(`Planeacion_${data.nombre_proyecto.replace(/\s+/g, '_')}.pdf`);

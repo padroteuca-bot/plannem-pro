@@ -114,6 +114,27 @@
                 </select>
             </div>
             
+            <div class="form-group">
+                <label>Mes / Efeméride Sugerida</label>
+                <select id="mes_sugerido" class="form-control">
+                    <option value="">(Opcional) Selecciona un mes para sugerencias automáticas...</option>
+                    <option value="septiembre">Septiembre (Independencia, Textos)</option>
+                    <option value="octubre">Octubre (Descubrimiento)</option>
+                    <option value="noviembre">Noviembre (Día de Muertos, Calaveritas)</option>
+                    <option value="diciembre">Diciembre (Cartas, Invierno)</option>
+                    <option value="enero">Enero (Propósitos, Narrativa)</option>
+                    <option value="febrero">Febrero (Día de la Bandera)</option>
+                    <option value="marzo">Marzo (Primavera, Matemáticas)</option>
+                    <option value="abril">Abril (Día del Niño, Juegos)</option>
+                    <option value="mayo">Mayo (Día de la Madre, Maestros)</option>
+                    <option value="junio">Junio (Cierre, Evaluaciones)</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" onclick="autoSuggestProject()" style="width:100%; margin-bottom:1.5rem; background:linear-gradient(45deg, var(--accent), var(--accent-blue)); border:none;">
+                ✨ Autocompletar Proyecto Sugerido (Inteligencia Local)
+            </button>
+            
             <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); padding:1rem; border-radius:10px; margin-bottom:1.5rem;">
                 <p style="font-size:0.85rem; color:var(--accent-blue); margin-bottom:0.3rem; font-weight:600;">Metodología Sugerida por la SEP:</p>
                 <h3 id="metodologia-display" style="color:#93C5FD;">Selecciona un campo formativo primero</h3>
@@ -213,6 +234,11 @@
             <div class="form-group">
                 <label>Criterios de Evaluación (vinculados a los PDA)</label>
                 <textarea id="criterios_eval" class="form-control" placeholder="¿Qué vas a observar/evaluar en los alumnos?"></textarea>
+            </div>
+
+            <div id="rubrica-container" style="display:none; background:rgba(16,185,129,0.05); padding:1rem; border-radius:8px; border:1px solid rgba(16,185,129,0.2); margin-top:1rem;">
+                <h4 style="margin-bottom:0.5rem; color:var(--success);">Rúbrica Generada Sugerida</h4>
+                <div id="rubrica-content" style="font-size:0.85rem; line-height:1.4;"></div>
             </div>
         </div>
 
