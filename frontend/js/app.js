@@ -355,35 +355,47 @@ function applySuggestion(index) {
         });
     }
     
-    // PDAs
-    if (data.pdas) {
-        qsa('.pda-checkbox').forEach(cb => {
-            cb.checked = data.pdas.some(p => p.includes(cb.value.substring(0, 20))); 
-        });
+    // PDAs - Seleccionar automáticamente entre 1 y 3 PDAs reales del contenedor
+    const pdaCheckboxes = Array.from(qsa('.pda-checkbox'));
+    pdaCheckboxes.forEach(cb => cb.checked = false); // clear first
+    if (pdaCheckboxes.length > 0) {
+        const numToSelect = Math.min(pdaCheckboxes.length, Math.floor(Math.random() * 3) + 1);
+        const shuffled = pdaCheckboxes.sort(() => 0.5 - Math.random());
+        for(let i=0; i<numToSelect; i++) {
+            shuffled[i].checked = true;
+        }
     }
     
-    // Actividades
+    // Actividades - Mapear directamente al modelo de datos sin depender del DOM
     if (data.actividades) {
-        data.actividades.forEach((act) => {
-            const mIds = Array.from(qsa('.accordion-header span')).filter(s => s.textContent === act.momento);
-            if(mIds.length > 0) {
-                const accordion = mIds[0].parentElement.parentElement;
-                const inputs = accordion.querySelectorAll('.act-input');
-                inputs.forEach(input => {
-                    const mId = input.dataset.id;
-                    if (!planeacionData.actividades[mId]) planeacionData.actividades[mId] = {inicio:'', desarrollo:'', cierre:'', tiempo:'', recursos:''};
-                    
-                    if (input.dataset.field === act.tipo.toLowerCase()) {
-                        planeacionData.actividades[mId][act.tipo.toLowerCase()] = act.descripcion;
-                        input.value = act.descripcion;
-                    }
-                    if (act.tiempo && input.dataset.field === 'tiempo') {
-                        planeacionData.actividades[mId].tiempo = act.tiempo + ' min';
-                        input.value = act.tiempo + ' min';
-                    }
+        const campoId = qs('#campo_formativo').value;
+        if (campoId && window.NEM.CAMPOS[campoId]) {
+            const metodologia = window.NEM.CAMPOS[campoId].metodologia;
+            
+            data.actividades.forEach((act) => {
+                let mId = null;
+                metodologia.fases.forEach((fase, f_idx) => {
+                    fase.momentos.forEach((momento, m_idx) => {
+                        if (momento === act.momento) mId = `act_${f_idx}_${m_idx}`;
+                    });
                 });
-            }
-        });
+                
+                if (mId) {
+                    if (!planeacionData.actividades[mId]) {
+                        planeacionData.actividades[mId] = {inicio:'', desarrollo:'', cierre:'', tiempo:'', recursos:''};
+                    }
+                    const field = act.tipo.toLowerCase();
+                    if (field === 'inicio' || field === 'desarrollo' || field === 'cierre') {
+                        planeacionData.actividades[mId][field] = act.descripcion;
+                    }
+                    if (act.tiempo) {
+                        planeacionData.actividades[mId].tiempo = act.tiempo + ' min';
+                    }
+                }
+            });
+            
+            if (currentStep === 3) generateActividadesUI();
+        }
     }
     
     // Rubrica
