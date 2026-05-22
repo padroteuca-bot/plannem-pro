@@ -314,26 +314,38 @@ def get_evaluacion_options():
     }
 
 # --- SUGERENCIAS INTELIGENTES ENDPOINTS ---
-from nem_templates import SUGERENCIAS_PROYECTOS
+import json
+import os
+import random
+
+def load_massive_templates():
+    filepath = os.path.join(os.path.dirname(__file__), "nem_massive_templates.json")
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+SUGERENCIAS_PROYECTOS_MASIVAS = load_massive_templates()
 
 @app.get("/api/nem/suggest_project")
 def suggest_project(fase: int, campo: str, mes: str = ""):
-    fase_data = SUGERENCIAS_PROYECTOS.get(fase, {})
+    fase_data = SUGERENCIAS_PROYECTOS_MASIVAS.get(str(fase), {})
     campo_data = fase_data.get(campo, {})
     
     sugerencias = []
-    # If mes matches, add those
     if mes in campo_data:
         sugerencias.extend(campo_data[mes])
     
-    # Always include general ones if they exist
     if "general" in campo_data:
         sugerencias.extend(campo_data["general"])
         
     if not sugerencias:
         return {"error": "No hay sugerencias precargadas para esta combinación. Intenta con Fase 3 - Lenguajes."}
         
-    return {"sugerencias": sugerencias}
+    # Barajear y retornar hasta 15 opciones para no saturar la vista, dándole variedad
+    random.shuffle(sugerencias)
+    return {"sugerencias": sugerencias[:15]}
 
 # --- PLANEACIONES ENDPOINTS ---
 
