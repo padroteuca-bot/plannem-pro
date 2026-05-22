@@ -6,3 +6,4 @@ python-jose[cryptography]
 bcrypt
 python-multipart
 fpdf2
+pydantic[email]
