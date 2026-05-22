@@ -147,8 +147,8 @@ async function activateUser(userId, email, plan) {
 // init auth check to ensure we have a token (admin must log in as normal user first)
 window.onload = async () => {
     const user = await window.ccAuth.checkAuth(false);
-    if (user && user.email !== 'admin@admin.com') {
-        alert('Esta cuenta no tiene privilegios de administrador.');
+    if (!user) {
+        alert('Debes iniciar sesión primero para acceder al panel de administrador.');
         window.location.href = '/app/';
     }
 };

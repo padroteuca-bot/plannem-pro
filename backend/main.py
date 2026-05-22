@@ -432,8 +432,9 @@ def get_school_profile(current_user: User = Depends(get_current_user), db: Sessi
 # --- ADMIN ENDPOINTS ---
 
 @app.get("/api/admin/users")
-def get_users(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.email != "admin@admin.com": # Replace with robust check if needed
+def get_users(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    admin_pwd = request.headers.get("X-Admin-Password")
+    if admin_pwd != ADMIN_PASSWORD:
         raise HTTPException(status_code=403, detail="Forbidden")
     users = db.query(User).order_by(User.created_at.desc()).all()
     return [
